@@ -1,4 +1,5 @@
-﻿using Persistance.Repositories;
+﻿using Microsoft.Extensions.Hosting;
+using Persistance.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,51 +9,50 @@ using System.Threading.Tasks;
 namespace DapperDemoCLI;
 public class MyApp
 {
-    private readonly IJournalRepo _journalRepo;
+    
+    private bool exitApp = false;
+    private readonly JournalService _journalService;
 
-    public MyApp(IJournalRepo journalRepo)
+    public MyApp(JournalService journalService)
     {
-        _journalRepo = journalRepo;
+        _journalService = journalService;
     }
 
 
 
-    public void ShowMenu()
-    {
-        Console.WriteLine("1. Add Journal");
-        Console.WriteLine("2. View Journals");
-        Console.WriteLine("3. Update Journal");
-        Console.WriteLine("4. Delete Journal");
-        Console.WriteLine("5. Exit");
-        Console.WriteLine("Enter your choice: ");
-        var choice = Console.ReadLine();
 
-        if (int.Parse(choice) == 2)
+
+    internal void Run(string[] args)
+    {
+        while (!exitApp)
         {
-            ShowJournalList();
+            Menu.ShowMenu();
+            int choice = Menu.GetChoice();
+
+
+            switch (choice)
+            {
+                case 1:
+                    Console.WriteLine("Add Journal");
+                    break;
+                case 2:
+                    _journalService.ShowJournalList();
+                    break;
+                case 3:
+                    Console.WriteLine("Update Journal");
+                    break;
+                case 4:
+                    Console.WriteLine("Delete Journal");
+                    break;
+                case 5:
+                    Console.WriteLine("Exit");
+                    exitApp = true;
+                    break;
+                default:
+                    break;
+            }
         }
-
-
-
-
-
-
     }
-
-
-    public void ShowJournalList()
-    {
-        var journalEntries = _journalRepo.GetAll().Result;
-
-        foreach (var item in journalEntries)
-        {
-            Console.WriteLine($"{item.Id}, {item.Title}, {item.CreatedDate}");
-        }
-
-
-    }
-
-
 
 
 }

@@ -9,10 +9,11 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        var host = CreateHostBuilder(args).Build();
-        var app = host.Services.GetRequiredService<MyApp>();
-        app.ShowMenu();
+        using IHost host = CreateHostBuilder(args).Build();
+        using var scope = host.Services.CreateScope();
+        var services = scope.ServiceProvider;
 
+        services.GetRequiredService<MyApp>().Run(args);
 
     }
 
@@ -20,8 +21,9 @@ class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddTransient<ISQLDataAccess, SQLDataAccess>();
-                services.AddTransient<IJournalRepo, JournalRepo>();
-                services.AddTransient<MyApp>();
+                services.AddScoped<ISQLDataAccess, SQLDataAccess>();
+                services.AddScoped<IJournalRepo, JournalRepo>();
+                services.AddScoped<JournalService>();
+                services.AddSingleton<MyApp>();
             });
 }
